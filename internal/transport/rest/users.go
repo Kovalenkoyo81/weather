@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kovalenkoyo81/weather/internal/models"
+	"github.com/kovalenkoyo81/weather/internal/models/"
 )
 
 func (r *Rest) createUser(c *gin.Context) {
