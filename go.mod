@@ -1,4 +1,5 @@
-module github.com/Kovalenkoyo81/first
+module github.com/Kovalenkoyo81/weather
+
 
 go 1.21.6
 
