@@ -3,8 +3,8 @@ package rest
 import (
 	"net/http"
 
+	"github.com/Kovalenkoyo81/weather/internal/models"
 	"github.com/gin-gonic/gin"
-	"github.com/kovalenkoyo81/weather/internal/models/"
 )
 
 func (r *Rest) createUser(c *gin.Context) {
