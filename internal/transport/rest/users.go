@@ -33,17 +33,15 @@ func (r *Rest) userExists(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"exists": exists})
 }
 
-// createFavorite добавляет новую закладку для пользователя
 func (r *Rest) createFavorite(c *gin.Context) {
-	token := c.Param("token") // Токен пользователя используется как идентификатор
-
+	token := c.Param("token")
 	var favorite models.Favorite
 	if err := c.BindJSON(&favorite); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
-	if err := r.service.SaveFavorite(token, favorite); err != nil {
+	if err := r.service.SaveFavorite(c, token, favorite); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save favorite"})
 		return
 	}
@@ -51,11 +49,10 @@ func (r *Rest) createFavorite(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Favorite saved successfully"})
 }
 
-// getFavorites возвращает список закладок пользователя
 func (r *Rest) getFavorites(c *gin.Context) {
-	token := c.Param("token") // Токен пользователя используется как идентификатор
+	token := c.Param("token")
 
-	favorites, err := r.service.GetFavorites(token)
+	favorites, err := r.service.GetFavorites(c, token)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get favorites"})
 		return
@@ -64,12 +61,10 @@ func (r *Rest) getFavorites(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"favorites": favorites})
 }
 
-// deleteFavorite удаляет указанную закладку пользователя
 func (r *Rest) deleteFavorite(c *gin.Context) {
-	token := c.Param("token") // Токен пользователя используется как идентификатор
-	city := c.Param("city")   // Параметр из URL для идентификации города
-
-	if err := r.service.DeleteFavorite(token, city); err != nil {
+	token := c.Param("token")
+	city := c.Param("city")
+	if err := r.service.DeleteFavorite(c, token, city); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete favorite"})
 		return
 	}
