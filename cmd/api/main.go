@@ -7,6 +7,7 @@ import (
 )
 
 func main() {
+
 	repo := &memory.Repository{}
 	service := services.New(repo)
 	server := rest.NewServer(service)

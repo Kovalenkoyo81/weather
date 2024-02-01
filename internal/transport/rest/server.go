@@ -24,9 +24,9 @@ func NewServer(service *services.Service) *gin.Engine {
 	authorized := r.Group("/users/:token")
 	authorized.Use(TokenAuthMiddleware(service))
 	{
-		//authorized.POST("/favorites", rest.createFavorite)
-		//authorized.GET("/favorites", rest.getFavorites)
-		//	authorized.DELETE("/favorites/:city", rest.deleteFavorite)
+		authorized.POST("/favorites", rest.createFavorite)
+		authorized.GET("/favorites", rest.getFavorites)
+		authorized.DELETE("/favorites/:city", rest.deleteFavorite)
 	}
 
 	// Открытые маршруты

@@ -1,11 +1,16 @@
+// internal/repositories/memory/memory.go
+
 package memory
 
 import (
+	"errors"
+
 	"github.com/Kovalenkoyo81/weather/internal/models"
 )
 
 type Repository struct {
-	users []models.User
+	users        []models.User
+	favoritesMap map[string][]models.Favorite // Добавляем хранение закладок
 }
 
 func (r *Repository) AddUser(user models.User) {
@@ -19,4 +24,30 @@ func (r *Repository) FindUser(name string) bool {
 		}
 	}
 	return false
+}
+
+// Методы для работы с закладками
+func (r *Repository) SaveFavorite(userToken string, favorite models.Favorite) error {
+	r.favoritesMap[userToken] = append(r.favoritesMap[userToken], favorite)
+	return nil
+}
+
+func (r *Repository) GetFavorites(userToken string) ([]models.Favorite, error) {
+	return r.favoritesMap[userToken], nil
+}
+
+func (r *Repository) DeleteFavorite(userToken, city string) error {
+	favorites, exists := r.favoritesMap[userToken]
+	if !exists {
+		return errors.New("no favorites found")
+	}
+
+	for i, f := range favorites {
+		if f.City == city {
+			r.favoritesMap[userToken] = append(favorites[:i], favorites[i+1:]...)
+			return nil
+		}
+	}
+
+	return errors.New("favorite not found")
 }
