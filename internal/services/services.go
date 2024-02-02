@@ -2,19 +2,34 @@
 package services
 
 import (
-	"context"
+	"encoding/json"
 
+	"github.com/Kovalenkoyo81/weather/internal/config"
 	"github.com/Kovalenkoyo81/weather/internal/models"
+	"github.com/go-resty/resty/v2"
 )
 
-func (s *Service) SaveFavorite(ctx context.Context, userToken string, favorite models.Favorite) error {
-	return s.repo.SaveFavorite(userToken, favorite)
-}
+// GetCurrentWeather делает запрос к API погоды и возвращает погодные условия для указанного города
+func (s *Service) GetCurrentWeather(city, lang string) (*models.СurrentWeatherResponse, error) {
 
-func (s *Service) GetFavorites(ctx context.Context, userToken string) ([]models.Favorite, error) {
-	return s.repo.GetFavorites(userToken)
-}
+	client := resty.New()
+	resp, err := client.R().
+		SetQueryParams(map[string]string{
+			"q":    city,
+			"lang": lang,
+			"key":  config.ApiKey,
+		}).
+		Get("https://api.weatherapi.com/v1/current.json")
 
-func (s *Service) DeleteFavorite(ctx context.Context, userToken, city string) error {
-	return s.repo.DeleteFavorite(userToken, city)
+	if err != nil {
+		return nil, err
+	}
+
+	var weatherResponse models.СurrentWeatherResponse
+	err = json.Unmarshal(resp.Body(), &weatherResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &weatherResponse, nil
 }

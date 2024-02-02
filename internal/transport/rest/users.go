@@ -1,8 +1,10 @@
+// internal/transport/users.go
 package rest
 
 import (
 	"net/http"
 
+	"github.com/Kovalenkoyo81/weather/internal/config"
 	"github.com/Kovalenkoyo81/weather/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -63,11 +65,38 @@ func (r *Rest) getFavorites(c *gin.Context) {
 
 func (r *Rest) deleteFavorite(c *gin.Context) {
 	token := c.Param("token")
-	city := c.Param("city")
+	city := c.Query("city")
 	if err := r.service.DeleteFavorite(c, token, city); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete favorite"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Favorite deleted successfully"})
+}
+
+func (r *Rest) handleCurrentWeather(c *gin.Context) {
+	token := c.Param("token") // Предполагается, что токен пользователя передается через параметры пути
+	lang := config.Lang       // Язык по умолчанию для запроса погоды
+
+	// Получаем город из query параметров запроса
+	city := c.Query("city")
+
+	if city == "" {
+		favorites, err := r.service.GetFavorites(c, token)
+		if err != nil || len(favorites) == 0 {
+			// Если нет закладок, используем "rostov" как город по умолчанию
+			city = config.DefaultCity
+		} else {
+			// Используем город из первой закладки
+			city = favorites[0].City
+		}
+	}
+
+	weatherData, err := r.service.GetCurrentWeather(city, lang)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get current weather"})
+		return
+	}
+
+	c.JSON(http.StatusOK, weatherData)
 }
