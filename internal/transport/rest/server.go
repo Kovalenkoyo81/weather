@@ -32,6 +32,7 @@ func NewServer(service *services.Service) *gin.Engine {
 	}
 
 	// Открытые маршруты
+	//r.POST("/login", rest.login)
 	r.POST("/users", rest.createUser)
 	r.GET("/users/:name/exists", rest.userExists)
 

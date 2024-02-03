@@ -75,8 +75,8 @@ func (r *Rest) deleteFavorite(c *gin.Context) {
 }
 
 func (r *Rest) handleCurrentWeather(c *gin.Context) {
-	token := c.Param("token") // Предполагается, что токен пользователя передается через параметры пути
-	lang := config.Lang       // Язык по умолчанию для запроса погоды
+	token := c.Query("token")
+	lang := config.Lang
 
 	// Получаем город из query параметров запроса
 	city := c.Query("city")
@@ -99,4 +99,16 @@ func (r *Rest) handleCurrentWeather(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, weatherData)
+}
+
+func (r *Rest) login(c *gin.Context) {
+	login := c.Param("login")
+
+	favorites, err := r.service.UserExists(c, login)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get favorites"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"favorites": favorites})
 }

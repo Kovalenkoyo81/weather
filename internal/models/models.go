@@ -1,3 +1,5 @@
+// internal/models/models.go
+
 package models
 
 type User struct {
@@ -7,6 +9,10 @@ type User struct {
 type Favorite struct {
 	City       string   `json:"city"`
 	Parameters []string `json:"parameters"`
+}
+
+type LoginRequest struct {
+	User string `json:"user"`
 }
 
 type СurrentWeatherResponse struct {

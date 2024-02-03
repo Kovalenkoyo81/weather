@@ -1,3 +1,5 @@
+// internal/config/config.go
+
 package config
 
 var DebugMode bool = false
