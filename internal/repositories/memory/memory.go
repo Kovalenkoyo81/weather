@@ -10,7 +10,7 @@ import (
 
 type Repository struct {
 	users        []models.User
-	favoritesMap map[string][]models.Favorite // Добавляем хранение закладок
+	favoritesMap map[string][]models.Favorite
 }
 
 func (r *Repository) AddUser(user models.User) {

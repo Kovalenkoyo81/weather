@@ -104,11 +104,4 @@ func (r *Rest) handleCurrentWeather(c *gin.Context) {
 func (r *Rest) login(c *gin.Context) {
 	login := c.Param("login")
 
-	favorites, err := r.service.UserExists(c, login)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get favorites"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"favorites": favorites})
 }
