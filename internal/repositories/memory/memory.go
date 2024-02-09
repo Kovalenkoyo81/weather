@@ -14,6 +14,14 @@ type Repository struct {
 	tokensMap    map[string]string
 }
 
+func NewRepository() *Repository {
+	return &Repository{
+		users:        []models.User{},
+		favoritesMap: make(map[string][]models.Favorite),
+		tokensMap:    make(map[string]string),
+	}
+}
+
 func (r *Repository) AddUser(user models.User) {
 	r.users = append(r.users, user)
 }
