@@ -42,7 +42,7 @@ package rest
 
 import (
 	"encoding/base64"
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -54,34 +54,30 @@ func TokenAuthMiddleware(service *services.Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			fmt.Println("TokenAuthMiddleware: No Authorization header")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
 			return
 		}
 
-		token64 := strings.TrimPrefix(authHeader, "Bearer ")
-		decodedBytes, err := base64.StdEncoding.DecodeString(token64)
+		token := strings.TrimPrefix(authHeader, "Bearer ")
+		decodedBytes, err := base64.StdEncoding.DecodeString(token)
 		if err != nil {
-			fmt.Println("TokenAuthMiddleware: Error decoding token", err)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
 			return
 		}
 
-		token := string(decodedBytes)
-
-		fmt.Printf("TokenAuthMiddleware: Decoded username: %s\n", token)
-		exists, err := service.UserExists(token)
-		if err != nil || !exists {
-			fmt.Printf("TokenAuthMiddleware: User not found or error: %v, exists: %t\n", err, exists)
+		var username string
+		if err := json.Unmarshal(decodedBytes, &username); err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			return
 		}
 
-		// Можете добавить имя пользователя в контекст, если это необходимо для последующих обработчиков
-		c.Set("username", token)
+		exists, err := service.UserExists(username)
+		if err != nil || !exists {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			return
+		}
 
-		fmt.Println("TokenAuthMiddleware: User authenticated successfully")
-
+		c.Set("username", username)
 		c.Next()
 	}
 }

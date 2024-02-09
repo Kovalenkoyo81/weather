@@ -16,16 +16,28 @@ import (
 func (r *Rest) createUser(c *gin.Context) {
 	var user models.User
 	if err := c.BindJSON(&user); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data"})
+		return
+	}
+	// Проверка, что имя пользователя не пустое
+	if user.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User name cannot be empty, format {name:user}"})
 		return
 	}
 
-	if err := r.service.CreateNewUser(c, user); err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+	err := r.service.CreateNewUser(c, user)
+	if err != nil {
+		// Проверяем, является ли ошибка "пользователь уже существует"
+		if err.Error() == "user already exists" {
+			c.JSON(http.StatusConflict, gin.H{"error": "User already exists"})
+		} else {
+			// Для всех остальных ошибок возвращаем 500
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		}
 		return
 	}
-	fmt.Println("User ", user, " created")
-	c.Status(http.StatusOK)
+
+	c.Status(http.StatusCreated) // Возвращаем статус 201 Created для успешно созданного пользователя
 }
 
 func (r *Rest) userExists(c *gin.Context) {
@@ -114,6 +126,7 @@ func (r *Rest) login(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(loginRequest.User)
 	// Проверка существования пользователя
 	exists, err := r.service.UserExists(loginRequest.User)
 	if err != nil {

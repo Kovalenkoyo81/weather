@@ -25,6 +25,7 @@ func NewRepository() *Repository {
 
 func (r *Repository) AddUser(user models.User) {
 	r.users = append(r.users, user)
+	fmt.Println("r.users = ", r.users)
 }
 
 func (r *Repository) FindUser(name string) bool {
@@ -65,7 +66,7 @@ func (r *Repository) DeleteFavorite(userToken, city string) error {
 // Метод для сохранения токена пользователя
 func (r *Repository) SaveToken(token string, username string) {
 	//r.tokensMap[token] = username
-	r.tokensMap[username] = token
+	r.tokensMap[token] = username
 	fmt.Println(r.tokensMap)
 }
 

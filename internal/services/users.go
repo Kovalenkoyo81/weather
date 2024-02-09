@@ -3,6 +3,7 @@ package services
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Kovalenkoyo81/weather/internal/models"
 )
@@ -26,6 +27,18 @@ func New(repo UsersRepository) *Service {
 }
 
 func (s *Service) CreateNewUser(ctx context.Context, user models.User) error {
+	// Проверка существования пользователя с таким именем
+	exists, err := s.UserExists(user.Name)
+	if err != nil {
+		// Обработка ошибки, если проверка на существование пользователя не удалась
+		return err
+	}
+	if exists {
+		// Возвращаем ошибку, если пользователь уже существует
+		return errors.New("user already exists")
+	}
+
+	// Если пользователя не существует, добавляем его в репозиторий
 	s.repo.AddUser(user)
 	return nil
 }

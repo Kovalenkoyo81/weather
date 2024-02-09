@@ -22,9 +22,9 @@ func NewServer(service *services.Service) *gin.Engine {
 	rest := &Rest{service: service}
 
 	// Открытые маршруты
-	r.POST("/login", rest.login)
-	r.POST("/users", rest.createUser)
 	r.GET("/users/:name/exists", rest.userExists)
+	r.POST("/users", rest.createUser)
+	r.POST("/login", rest.login)
 
 	// Создание группы для защищенных маршрутов с применением мидлвара аутентификации
 	authorized := r.Group("/")
