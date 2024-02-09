@@ -2,6 +2,8 @@
 package rest
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"net/http"
 
 	"github.com/Kovalenkoyo81/weather/internal/config"
@@ -102,6 +104,20 @@ func (r *Rest) handleCurrentWeather(c *gin.Context) {
 }
 
 func (r *Rest) login(c *gin.Context) {
-	login := c.Param("login")
+	var loginRequest models.LoginRequest
+	if err := c.BindJSON(&loginRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
 
+	// Генерация токена
+	userData := loginRequest.User
+	userDataJson, _ := json.Marshal(userData)
+	token := base64.StdEncoding.EncodeToString(userDataJson)
+
+	// Сохранение токена в репозитории
+	r.service.SaveToken(c, token, userData)
+
+	// Возврат токена пользователю
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }

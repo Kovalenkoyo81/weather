@@ -11,6 +11,7 @@ import (
 type Repository struct {
 	users        []models.User
 	favoritesMap map[string][]models.Favorite
+	tokensMap    map[string]string
 }
 
 func (r *Repository) AddUser(user models.User) {
@@ -50,4 +51,15 @@ func (r *Repository) DeleteFavorite(userToken, city string) error {
 	}
 
 	return errors.New("favorite not found")
+}
+
+// Метод для сохранения токена пользователя
+func (r *Repository) SaveToken(token string, username string) {
+	r.tokensMap[token] = username
+}
+
+// Метод для получения имени пользователя по токену
+func (r *Repository) GetUserByToken(token string) (string, bool) {
+	username, exists := r.tokensMap[token]
+	return username, exists
 }
