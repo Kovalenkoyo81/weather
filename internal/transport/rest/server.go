@@ -1,4 +1,3 @@
-// internal/transport/server.go
 package rest
 
 import (
@@ -19,22 +18,24 @@ func NewServer(service *services.Service) *gin.Engine {
 	}
 
 	r := gin.Default()
-	rest := Rest{service: service}
 
-	// Применение middleware к защищенным маршрутам
-	authorized := r.Group("/users/:token")
+	rest := &Rest{service: service}
+
+	// Открытые маршруты
+	r.POST("/login", rest.login)
+	r.POST("/users", rest.createUser)
+	r.GET("/users/:name/exists", rest.userExists)
+
+	// Создание группы для защищенных маршрутов с применением мидлвара аутентификации
+	authorized := r.Group("/")
 	authorized.Use(TokenAuthMiddleware(service))
 	{
+		// Теперь мидлвар применяется только к маршрутам в этой группе
 		authorized.GET("/weather/current", rest.handleCurrentWeather)
 		authorized.POST("/favorites", rest.createFavorite)
 		authorized.GET("/favorites", rest.getFavorites)
 		authorized.DELETE("/favorites/:city", rest.deleteFavorite)
 	}
-
-	// Открытые маршруты
-	r.POST("/login", rest.login)
-	r.POST("/users", rest.createUser)
-	r.GET("/users/name/:exists", rest.userExists)
 
 	return r
 }

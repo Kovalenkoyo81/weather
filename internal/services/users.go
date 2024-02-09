@@ -46,13 +46,11 @@ func (s *Service) DeleteFavorite(ctx context.Context, userToken, city string) er
 	return s.repo.DeleteFavorite(userToken, city)
 }
 
-// Метод для сохранения токена в репозитории
-func (s *Service) SaveToken(ctx context.Context, token string, username string) error {
+func (s *Service) SaveToken(token string, username string) error {
 	s.repo.SaveToken(token, username)
 	return nil
 }
 
-// Метод для получения имени пользователя по токену
-func (s *Service) GetUserByToken(ctx context.Context, token string) (string, bool) {
+func (s *Service) GetUserByToken(token string) (string, bool) {
 	return s.repo.GetUserByToken(token)
 }

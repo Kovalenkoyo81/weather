@@ -116,7 +116,7 @@ func (r *Rest) login(c *gin.Context) {
 	token := base64.StdEncoding.EncodeToString(userDataJson)
 
 	// Сохранение токена в репозитории
-	r.service.SaveToken(c, token, userData)
+	r.service.SaveToken(token, userData)
 
 	// Возврат токена пользователю
 	c.JSON(http.StatusOK, gin.H{"token": token})
