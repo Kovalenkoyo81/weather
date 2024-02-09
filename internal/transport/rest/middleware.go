@@ -41,12 +41,12 @@
 package rest
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"strings"
 
 	"github.com/Kovalenkoyo81/weather/internal/services"
+	"github.com/Kovalenkoyo81/weather/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -54,14 +54,14 @@ func TokenAuthMiddleware(service *services.Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
 			return
 		}
 
 		token := strings.TrimPrefix(authHeader, "Bearer ")
-		decodedBytes, err := base64.StdEncoding.DecodeString(token)
+		username, err := utils.ExtractUsernameFromToken(token)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
 
