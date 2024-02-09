@@ -10,7 +10,7 @@ import (
 
 	"github.com/Kovalenkoyo81/weather/internal/config"
 	"github.com/Kovalenkoyo81/weather/internal/models"
-	"github.com/Kovalenkoyo81/weather/internal/utils"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -112,17 +112,19 @@ func (r *Rest) handleCurrentWeather(c *gin.Context) {
 }
 
 func (r *Rest) createFavorite(c *gin.Context) {
-	username, err := utils.UserAuthorizator(c)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+
+	username, ok := GetUserFromContext(c)
+	if !ok {
 		return
 	}
+
 	var favorite models.Favorite
 	if err := c.BindJSON(&favorite); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
+	// Использование извлеченного имени пользователя для сохранения избранного
 	if err := r.service.SaveFavorite(c, username, favorite); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save favorite"})
 		return
@@ -130,11 +132,9 @@ func (r *Rest) createFavorite(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Favorite saved successfully"})
 }
-
 func (r *Rest) getFavorites(c *gin.Context) {
-	username, err := utils.UserAuthorizator(c)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+	username, ok := GetUserFromContext(c)
+	if !ok {
 		return
 	}
 
@@ -148,11 +148,11 @@ func (r *Rest) getFavorites(c *gin.Context) {
 }
 
 func (r *Rest) deleteFavorite(c *gin.Context) {
-	username, err := utils.UserAuthorizator(c)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+	username, ok := GetUserFromContext(c)
+	if !ok {
 		return
 	}
+
 	city := c.Query("city")
 	if err := r.service.DeleteFavorite(c, username, city); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete favorite"})
@@ -160,4 +160,19 @@ func (r *Rest) deleteFavorite(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Favorite deleted successfully"})
+}
+
+// GetUserFromContext извлекает имя пользователя из контекста запроса.
+func GetUserFromContext(c *gin.Context) (string, bool) {
+	usernameInterface, exists := c.Get("username")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Username not found in context"})
+		return "", false
+	}
+	username, ok := usernameInterface.(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Username in context is not a string"})
+		return "", false
+	}
+	return username, true
 }
