@@ -34,7 +34,7 @@ func NewServer(service *services.Service) *gin.Engine {
 		authorized.GET("/weather/current", rest.handleCurrentWeather)
 		authorized.POST("/favorites", rest.createFavorite)
 		authorized.GET("/favorites", rest.getFavorites)
-		authorized.DELETE("/favorites/:city", rest.deleteFavorite)
+		authorized.DELETE("/favorites", rest.deleteFavorite)
 	}
 
 	return r

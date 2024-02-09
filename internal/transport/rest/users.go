@@ -10,6 +10,7 @@ import (
 
 	"github.com/Kovalenkoyo81/weather/internal/config"
 	"github.com/Kovalenkoyo81/weather/internal/models"
+	"github.com/Kovalenkoyo81/weather/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -85,7 +86,6 @@ func (r *Rest) login(c *gin.Context) {
 func (r *Rest) handleCurrentWeather(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 	token := strings.TrimPrefix(authHeader, "Bearer ")
-	//token := c.Query("token")
 	lang := config.Lang
 
 	// Получаем город из query параметров запроса
@@ -112,14 +112,18 @@ func (r *Rest) handleCurrentWeather(c *gin.Context) {
 }
 
 func (r *Rest) createFavorite(c *gin.Context) {
-	token := c.Param("token")
+	username, err := utils.UserAuthorizator(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 	var favorite models.Favorite
 	if err := c.BindJSON(&favorite); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
-	if err := r.service.SaveFavorite(c, token, favorite); err != nil {
+	if err := r.service.SaveFavorite(c, username, favorite); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save favorite"})
 		return
 	}
@@ -128,9 +132,13 @@ func (r *Rest) createFavorite(c *gin.Context) {
 }
 
 func (r *Rest) getFavorites(c *gin.Context) {
-	token := c.Param("token")
+	username, err := utils.UserAuthorizator(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
-	favorites, err := r.service.GetFavorites(c, token)
+	favorites, err := r.service.GetFavorites(c, username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get favorites"})
 		return
@@ -140,9 +148,13 @@ func (r *Rest) getFavorites(c *gin.Context) {
 }
 
 func (r *Rest) deleteFavorite(c *gin.Context) {
-	token := c.Param("token")
+	username, err := utils.UserAuthorizator(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 	city := c.Query("city")
-	if err := r.service.DeleteFavorite(c, token, city); err != nil {
+	if err := r.service.DeleteFavorite(c, username, city); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete favorite"})
 		return
 	}
