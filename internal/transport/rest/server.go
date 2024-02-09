@@ -30,7 +30,7 @@ func NewServer(service *services.Service) *gin.Engine {
 	authorized := r.Group("/")
 	authorized.Use(TokenAuthMiddleware(service))
 	{
-		// Теперь мидлвар применяется только к маршрутам в этой группе
+
 		authorized.GET("/weather/current", rest.handleCurrentWeather)
 		authorized.POST("/favorites", rest.createFavorite)
 		authorized.GET("/favorites", rest.getFavorites)

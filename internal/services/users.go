@@ -30,7 +30,7 @@ func (s *Service) CreateNewUser(ctx context.Context, user models.User) error {
 	return nil
 }
 
-func (s *Service) UserExists(ctx context.Context, name string) (bool, error) {
+func (s *Service) UserExists(name string) (bool, error) {
 	return s.repo.FindUser(name), nil
 }
 

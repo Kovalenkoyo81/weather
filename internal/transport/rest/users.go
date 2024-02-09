@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/Kovalenkoyo81/weather/internal/config"
 	"github.com/Kovalenkoyo81/weather/internal/models"
@@ -28,7 +29,7 @@ func (r *Rest) createUser(c *gin.Context) {
 
 func (r *Rest) userExists(c *gin.Context) {
 	name := c.Param("name")
-	exists, err := r.service.UserExists(c, name)
+	exists, err := r.service.UserExists(name)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -77,7 +78,9 @@ func (r *Rest) deleteFavorite(c *gin.Context) {
 }
 
 func (r *Rest) handleCurrentWeather(c *gin.Context) {
-	token := c.Query("token")
+	authHeader := c.GetHeader("Authorization")
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+	//token := c.Query("token")
 	lang := config.Lang
 
 	// Получаем город из query параметров запроса

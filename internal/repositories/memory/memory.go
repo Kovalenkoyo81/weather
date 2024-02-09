@@ -4,6 +4,7 @@ package memory
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/Kovalenkoyo81/weather/internal/models"
 )
@@ -64,6 +65,7 @@ func (r *Repository) DeleteFavorite(userToken, city string) error {
 // Метод для сохранения токена пользователя
 func (r *Repository) SaveToken(token string, username string) {
 	r.tokensMap[token] = username
+	fmt.Println(r.tokensMap)
 }
 
 // Метод для получения имени пользователя по токену
