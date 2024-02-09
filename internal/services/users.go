@@ -14,8 +14,8 @@ type UsersRepository interface {
 	SaveFavorite(userToken string, favorite models.Favorite) error
 	GetFavorites(userToken string) ([]models.Favorite, error)
 	DeleteFavorite(userToken, city string) error
-	SaveToken(token string, username string)    // Добавляем метод для сохранения токена
-	GetUserByToken(token string) (string, bool) // Добавляем метод для получения имени пользователя по токену
+	SaveToken(token string, username string)
+	GetUserByToken(token string) (string, bool)
 }
 
 type Service struct {
@@ -27,18 +27,14 @@ func New(repo UsersRepository) *Service {
 }
 
 func (s *Service) CreateNewUser(ctx context.Context, user models.User) error {
-	// Проверка существования пользователя с таким именем
 	exists, err := s.UserExists(user.Name)
 	if err != nil {
-		// Обработка ошибки, если проверка на существование пользователя не удалась
 		return err
 	}
 	if exists {
-		// Возвращаем ошибку, если пользователь уже существует
 		return errors.New("user already exists")
 	}
 
-	// Если пользователя не существует, добавляем его в репозиторий
 	s.repo.AddUser(user)
 	return nil
 }
