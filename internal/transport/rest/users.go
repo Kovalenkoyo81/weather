@@ -4,6 +4,7 @@ package rest
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -23,7 +24,7 @@ func (r *Rest) createUser(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-
+	fmt.Println("User ", user, " created")
 	c.Status(http.StatusOK)
 }
 
@@ -110,6 +111,17 @@ func (r *Rest) login(c *gin.Context) {
 	var loginRequest models.LoginRequest
 	if err := c.BindJSON(&loginRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	// Проверка существования пользователя
+	exists, err := r.service.UserExists(loginRequest.User)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred"})
+		return
+	}
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User does not exist"})
 		return
 	}
 

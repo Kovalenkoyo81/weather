@@ -59,19 +59,18 @@ func TokenAuthMiddleware(service *services.Service) gin.HandlerFunc {
 			return
 		}
 
-		token := strings.TrimPrefix(authHeader, "Bearer ")
-		fmt.Println(token)
-		decodedBytes, err := base64.StdEncoding.DecodeString(token)
+		token64 := strings.TrimPrefix(authHeader, "Bearer ")
+		decodedBytes, err := base64.StdEncoding.DecodeString(token64)
 		if err != nil {
 			fmt.Println("TokenAuthMiddleware: Error decoding token", err)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
 			return
 		}
-		username := string(decodedBytes)
 
-		fmt.Printf("TokenAuthMiddleware: Decoded username: %s\n", username)
+		token := string(decodedBytes)
 
-		exists, err := service.UserExists(username)
+		fmt.Printf("TokenAuthMiddleware: Decoded username: %s\n", token)
+		exists, err := service.UserExists(token)
 		if err != nil || !exists {
 			fmt.Printf("TokenAuthMiddleware: User not found or error: %v, exists: %t\n", err, exists)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
@@ -79,7 +78,7 @@ func TokenAuthMiddleware(service *services.Service) gin.HandlerFunc {
 		}
 
 		// Можете добавить имя пользователя в контекст, если это необходимо для последующих обработчиков
-		c.Set("username", username)
+		c.Set("username", token)
 
 		fmt.Println("TokenAuthMiddleware: User authenticated successfully")
 

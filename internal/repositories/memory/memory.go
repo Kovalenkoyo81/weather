@@ -64,7 +64,8 @@ func (r *Repository) DeleteFavorite(userToken, city string) error {
 
 // Метод для сохранения токена пользователя
 func (r *Repository) SaveToken(token string, username string) {
-	r.tokensMap[token] = username
+	//r.tokensMap[token] = username
+	r.tokensMap[username] = token
 	fmt.Println(r.tokensMap)
 }
 
