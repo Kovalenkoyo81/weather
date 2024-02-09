@@ -1,4 +1,4 @@
-// internal/services/service.go
+// internal/services/weather.go
 package services
 
 import (
