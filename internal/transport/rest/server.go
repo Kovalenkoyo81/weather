@@ -22,19 +22,19 @@ func NewServer(service *services.Service) *gin.Engine {
 	rest := &Rest{service: service}
 
 	// Открытые маршруты
-	r.GET("/users/:name/exists", rest.userExists)
-	r.POST("/users", rest.createUser)
-	r.POST("/login", rest.login)
+	r.GET("/users/:name/exists", rest.userExists) //проверка существования пользователя
+	r.POST("/users", rest.createUser)             //создание пользователя
+	r.POST("/login", rest.login)                  // вход пользовтеля
 
 	// Создание группы для защищенных маршрутов с применением мидлвара аутентификации
 	authorized := r.Group("/")
-	authorized.Use(TokenAuthMiddleware(service))
+	authorized.Use(tokenAuthMiddleware(service))
 	{
 
-		authorized.GET("/weather/current", rest.handleCurrentWeather)
-		authorized.POST("/favorites", rest.createFavorite)
-		authorized.GET("/favorites", rest.getFavorites)
-		authorized.DELETE("/favorites", rest.deleteFavorite)
+		authorized.GET("/weather/current", rest.handleCurrentWeather) // получение текущей погоды
+		authorized.POST("/favorites", rest.createFavorite)            //создание закладки
+		authorized.GET("/favorites", rest.getFavorites)               //получение списка закладок
+		authorized.DELETE("/favorites/:city", rest.deleteFavorite)    //удаление закладки
 	}
 
 	return r

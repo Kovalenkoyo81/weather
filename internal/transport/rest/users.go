@@ -2,11 +2,11 @@
 package rest
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/Kovalenkoyo81/weather/internal/config"
 	"github.com/Kovalenkoyo81/weather/internal/models"
@@ -20,21 +20,27 @@ func (r *Rest) createUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data"})
 		return
 	}
+
 	// Проверка, что имя пользователя не пустое
 	if user.Name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User name cannot be empty, format {name:user}"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User name cannot be empty"})
 		return
 	}
 
-	err := r.service.CreateNewUser(c, user)
+	// Проверка на существование пользователя
+	exists, err := r.service.UserExists(user.Name)
 	if err != nil {
-		// Проверяем, является ли ошибка "пользователь уже существует"
-		if err.Error() == "user already exists" {
-			c.JSON(http.StatusConflict, gin.H{"error": "User already exists"})
-		} else {
-			// Для всех остальных ошибок возвращаем 500
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error checking user existence"})
+		return
+	}
+	if exists {
+		c.JSON(http.StatusConflict, gin.H{"error": "User already exists"})
+		return
+	}
+
+	// Создание нового пользователя, поскольку он не существует
+	if err := r.service.CreateNewUser(context.Background(), user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error creating user"})
 		return
 	}
 
@@ -45,11 +51,19 @@ func (r *Rest) userExists(c *gin.Context) {
 	name := c.Param("name")
 	exists, err := r.service.UserExists(name)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		// Если произошла ошибка при проверке существования пользователя, возвращаем 500 Internal Server Error
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking user existence"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"exists": exists})
+	if !exists {
+		// Если пользователь не найден, возвращаем 404 Not Found
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	// Если пользователь существует, возвращаем 200 OK и статус существования
+	c.JSON(http.StatusOK, gin.H{"exists": true})
 }
 
 func (r *Rest) login(c *gin.Context) {
@@ -84,17 +98,22 @@ func (r *Rest) login(c *gin.Context) {
 }
 
 func (r *Rest) handleCurrentWeather(c *gin.Context) {
-	authHeader := c.GetHeader("Authorization")
-	token := strings.TrimPrefix(authHeader, "Bearer ")
-	lang := config.Lang
+
+	username, ok := GetUserFromContext(c)
+	if !ok {
+		// GetUserFromContext сам отправляет соответствующий ответ клиенту,
+		// поэтому здесь нам просто нужно прервать выполнение функции.
+		return
+	}
 
 	// Получаем город из query параметров запроса
 	city := c.Query("city")
 
 	if city == "" {
-		favorites, err := r.service.GetFavorites(c, token)
+		// Если город не указан, получаем список избранных городов пользователя
+		favorites, err := r.service.GetFavorites(c, username)
 		if err != nil || len(favorites) == 0 {
-			// Если нет закладок, используем "rostov" как город по умолчанию
+			// Если у пользователя нет избранных городов, используем город по умолчанию
 			city = config.DefaultCity
 		} else {
 			// Используем город из первой закладки
@@ -102,12 +121,14 @@ func (r *Rest) handleCurrentWeather(c *gin.Context) {
 		}
 	}
 
-	weatherData, err := r.service.GetCurrentWeather(city, lang)
+	// Далее выполняем запрос к API погоды для получения данных по указанному городу
+	weatherData, err := r.service.GetCurrentWeather(city, config.Lang)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get current weather"})
 		return
 	}
 
+	// Отправляем полученные данные о погоде клиенту
 	c.JSON(http.StatusOK, weatherData)
 }
 
@@ -150,10 +171,10 @@ func (r *Rest) getFavorites(c *gin.Context) {
 func (r *Rest) deleteFavorite(c *gin.Context) {
 	username, ok := GetUserFromContext(c)
 	if !ok {
+		// Если пользователь не найден в контексте, ответ уже отправлен функцией GetUserFromContext
 		return
 	}
-
-	city := c.Query("city")
+	city := c.Param("city")
 	if err := r.service.DeleteFavorite(c, username, city); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete favorite"})
 		return

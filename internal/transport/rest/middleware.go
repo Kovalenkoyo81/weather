@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func TokenAuthMiddleware(service *services.Service) gin.HandlerFunc {
+func tokenAuthMiddleware(service *services.Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Извлечение токена из заголовка Authorization
 		authHeader := c.GetHeader("Authorization")

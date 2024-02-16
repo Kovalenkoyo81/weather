@@ -4,6 +4,7 @@ package memory
 
 import (
 	"errors"
+	"sync"
 
 	"github.com/Kovalenkoyo81/weather/internal/models"
 )
@@ -12,6 +13,7 @@ type Repository struct {
 	users        []models.User
 	favoritesMap map[string][]models.Favorite
 	tokensMap    map[string]string
+	mu           sync.Mutex
 }
 
 func NewRepository() *Repository {
@@ -23,8 +25,10 @@ func NewRepository() *Repository {
 }
 
 func (r *Repository) AddUser(user models.User) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	r.users = append(r.users, user)
-	//fmt.Println("r.users = ", r.users)
+
 }
 
 func (r *Repository) FindUser(name string) bool {
@@ -38,6 +42,8 @@ func (r *Repository) FindUser(name string) bool {
 
 // Методы для работы с закладками
 func (r *Repository) SaveFavorite(userToken string, favorite models.Favorite) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	r.favoritesMap[userToken] = append(r.favoritesMap[userToken], favorite)
 	return nil
 }
@@ -47,6 +53,8 @@ func (r *Repository) GetFavorites(userToken string) ([]models.Favorite, error) {
 }
 
 func (r *Repository) DeleteFavorite(userToken, city string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	favorites, exists := r.favoritesMap[userToken]
 	if !exists {
 		return errors.New("no favorites found")
@@ -64,9 +72,10 @@ func (r *Repository) DeleteFavorite(userToken, city string) error {
 
 // Метод для сохранения токена пользователя
 func (r *Repository) SaveToken(token string, username string) {
-	//r.tokensMap[token] = username
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	r.tokensMap[token] = username
-	//fmt.Println(r.tokensMap)
+
 }
 
 // Метод для получения имени пользователя по токену
