@@ -1,0 +1,187 @@
+openapi: 3.0.1
+info:
+  title: Bit School HTTP
+  version: 1.0.0
+servers:
+- url: http://localhost:8080
+tags:
+- name: users
+  description: Операции с пользователями
+- name: weather
+  description: Операции, связанные с погодой
+- name: favorites
+  description: Управление закладками
+paths:
+  /users/{name}/exists:
+    get:
+      tags:
+      - users
+      summary: Проверка существования пользователя
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+          description: Имя пользователя для поиска
+      responses:
+        "200":
+          description: Пользователь существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        "404":
+          description: Пользователь не найден
+  /users:
+    post:
+      tags:
+      - users
+      summary: Создание нового пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        "201":
+          description: Пользователь успешно создан
+        "400":
+          description: Неверный запрос
+  /login:
+    post:
+      tags:
+      - users
+      summary: Вход пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        "200":
+          description: Успешный вход
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Токен доступа
+        "401":
+          description: Неверные учетные данные
+  /weather/current:
+    get:
+      tags:
+      - weather
+      summary: Получение текущей погоды
+      parameters:
+        - in: query
+          name: city
+          required: true
+          schema:
+            type: string
+          description: Название города для получения погоды
+      responses:
+        "200":
+          description: Информация о погоде
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  temperature:
+                    type: number
+                    description: Температура
+                  description:
+                    type: string
+                    description: Описание погоды
+        "404":
+          description: Город не найден
+  /favorites:
+    post:
+      tags:
+      - favorites
+      summary: Создание закладки
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                city:
+                  type: string
+                  description: Название города для закладки
+      responses:
+        "201":
+          description: Закладка создана
+        "400":
+          description: Неверный запрос
+    get:
+      tags:
+      - favorites
+      summary: Получение списка закладок
+      responses:
+        "200":
+          description: Список закладок
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /favorites/{city}:
+    delete:
+      tags:
+      - favorites
+      summary: Удаление закладки
+      parameters:
+        - in: path
+          name: city
+          required: true
+          schema:
+            type: string
+          description: Название города закладки для удаления
+      responses:
+        "200":
+          description: Закладка удалена
+        "404":
+          description: Закладка не найдена
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    Status:
+      type: object
+      properties:
+        status:
+          type: boolean
+          description: Статус существования пользователя
+    CreateUser:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          example: user123
+    LoginRequest:
+      type: object
+      required:
+      - login
+      - password
+      properties:
+        login:
+          type: string
+          example: user123
+        password:
+          type: string
+          example: pass123
+x-original-swagger-version: "2.0"
