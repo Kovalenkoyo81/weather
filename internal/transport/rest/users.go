@@ -153,6 +153,7 @@ func (r *Rest) createFavorite(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Favorite saved successfully"})
 }
+
 func (r *Rest) getFavorites(c *gin.Context) {
 	username, ok := GetUserFromContext(c)
 	if !ok {

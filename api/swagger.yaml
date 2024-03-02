@@ -3,57 +3,71 @@ info:
   title: Bit School HTTP
   version: 1.0.0
 servers:
-- url: http://localhost:8080
+  - url: http://localhost:8080
 tags:
-- name: users
-  description: Операции с пользователями
-- name: weather
-  description: Операции, связанные с погодой
-- name: favorites
-  description: Управление закладками
+  - name: users
+    description: Operations related to users
+  - name: weather
+    description: Operations related to weather
+  - name: favorites
+    description: Managing favorites
 paths:
   /users/{name}/exists:
     get:
       tags:
-      - users
-      summary: Проверка существования пользователя
+        - users
+      summary: Check if a user exists
       parameters:
         - in: path
           name: name
           required: true
           schema:
             type: string
-          description: Имя пользователя для поиска
+          description: Name of the user to find
       responses:
-        "200":
-          description: Пользователь существует
+        '200':
+          description: User exists
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Status'
-        "404":
-          description: Пользователь не найден
+                type: object
+                properties:
+                  exists:
+                    type: boolean
+                    description: Indicates if the user exists or not
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
   /users:
     post:
       tags:
-      - users
-      summary: Создание нового пользователя
+        - users
+      summary: Create a new user
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateUser'
+              $ref: '#/components/schemas/User'
       responses:
-        "201":
-          description: Пользователь успешно создан
-        "400":
-          description: Неверный запрос
+        '201':
+          description: User created successfully
+        '400':
+          description: Bad request
+        '409':
+          description: User already exists
   /login:
     post:
       tags:
-      - users
-      summary: Вход пользователя
+        - users
+      summary: User login
       requestBody:
         required: true
         content:
@@ -61,8 +75,8 @@ paths:
             schema:
               $ref: '#/components/schemas/LoginRequest'
       responses:
-        "200":
-          description: Успешный вход
+        '200':
+          description: Successful login
           content:
             application/json:
               schema:
@@ -70,64 +84,67 @@ paths:
                 properties:
                   token:
                     type: string
-                    description: Токен доступа
-        "401":
-          description: Неверные учетные данные
+                    description: Access token
+        '401':
+          description: Invalid credentials
   /weather/current:
     get:
       tags:
-      - weather
-      summary: Получение текущей погоды
+        - weather
+      summary: Get current weather
+      security:
+      - BearerAuth: [] 
       parameters:
         - in: query
           name: city
-          required: true
+          required: false
           schema:
             type: string
-          description: Название города для получения погоды
+          description: City name to get weather for
+        - in: query
+          name: lang
+          schema:
+            type: string
+          description: Language code for response localization (e.g., 'en', 'ru', etc.)
+      
       responses:
-        "200":
-          description: Информация о погоде
+        '200':
+          description: Short weather information
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  temperature:
-                    type: number
-                    description: Температура
-                  description:
-                    type: string
-                    description: Описание погоды
-        "404":
-          description: Город не найден
+                $ref: '#/components/schemas/SimplifiedWeatherResponse'
+        '404':
+          description: City not found
+        '401':
+          description: User not authorized
   /favorites:
     post:
       tags:
-      - favorites
-      summary: Создание закладки
+        - favorites
+      summary: Create a favorite
+      security:
+      - BearerAuth: [] 
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                city:
-                  type: string
-                  description: Название города для закладки
+              $ref: '#/components/schemas/Favorite'
       responses:
-        "201":
-          description: Закладка создана
-        "400":
-          description: Неверный запрос
+        '200':
+          description: Favorite created
+        '400':
+          description: Bad request
     get:
       tags:
-      - favorites
-      summary: Получение списка закладок
+        - favorites
+      summary: Get list of favorites
+      security:
+      - BearerAuth: [] 
       responses:
-        "200":
-          description: Список закладок
+        '200':
+          description: List of favorites
           content:
             application/json:
               schema:
@@ -137,51 +154,70 @@ paths:
   /favorites/{city}:
     delete:
       tags:
-      - favorites
-      summary: Удаление закладки
+        - favorites
+      summary: Delete a favorite
+      security:
+      - BearerAuth: [] 
       parameters:
         - in: path
           name: city
           required: true
           schema:
             type: string
-          description: Название города закладки для удаления
+            example: New York
+          description: City name of the favorite to delete
       responses:
-        "200":
-          description: Закладка удалена
-        "404":
-          description: Закладка не найдена
+        '200':
+          description: Favorite deleted
+        '404':
+          description: Favorite not found
 components:
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
+    BearerAuth:  
+      type: http
+      scheme: bearer
   schemas:
-    Status:
-      type: object
-      properties:
-        status:
-          type: boolean
-          description: Статус существования пользователя
-    CreateUser:
+    User:
       type: object
       required:
-      - name
+        - name
       properties:
         name:
           type: string
-          example: user123
+          description: User's name
     LoginRequest:
       type: object
       required:
-      - login
-      - password
+        - user
       properties:
-        login:
+        user:
           type: string
-          example: user123
-        password:
+          example: "userName"
+    SimplifiedWeatherResponse:
+      type: object
+      properties:
+        Temperature:
+          type: number
+          description: Current temperature in Celsius
+        Description:
           type: string
-          example: pass123
-x-original-swagger-version: "2.0"
+          description: Textual description of current weather conditions
+        WindSpeed:
+          type: number
+          description: Wind speed in km/h
+    Favorite:
+      type: object
+      properties:
+        city:
+          type: string
+          description: City name for the favorite
+        parameters:
+          type: array
+          items:
+            type: string
+          description: List of parameters to track
+      example:
+        city: "New York"
+        parameters:
+          - "temp"
+          - "humidity"

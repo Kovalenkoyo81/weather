@@ -42,3 +42,9 @@ type СurrentWeatherResponse struct {
 		GustKph    float64 `json:"gust_kph"`
 	} `json:"current"`
 }
+
+type SimplifiedWeatherResponse struct {
+	Temperature float64 `json:"temperature"`
+	Description string  `json:"description"`
+	WindSpeed   float64 `json:"wind_speed"`
+}

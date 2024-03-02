@@ -25,13 +25,13 @@ func main() {
 		Handler: router, // Используем *gin.Engine как обработчик
 	}
 
-	
 	go func() {
 		// ListenAndServe всегда возвращает ошибку. ErrServerClosed возвращается при Graceful Shutdown
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
+	println("Server started")
 
 	// Настройка Graceful Shutdown
 	quit := make(chan os.Signal, 1)

@@ -16,12 +16,8 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-dev/
+/dev/*
 # Go workspace file
 go.work
 
-
-# kovalenko81
-api.key
-
-makefile
+TODO.txt

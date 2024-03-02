@@ -1,8 +1,11 @@
 package rest
 
 import (
+	"time"
+
 	"github.com/Kovalenkoyo81/weather/internal/config"
 	"github.com/Kovalenkoyo81/weather/internal/services"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,8 +21,19 @@ func NewServer(service *services.Service) *gin.Engine {
 	}
 
 	r := gin.Default()
-
 	rest := &Rest{service: service}
+	// Настройка CORS
+	//r.Use(cors.Default())
+	// Настраиваем CORS для разрешения предварительных запросов и запросов со специальными заголовками
+	config := cors.Config{
+		AllowOrigins:     []string{"*"}, // Разрешить все домены или указать конкретные
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type", "Accept"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour, // Кэшировать предварительные запросы в течение 12 часов
+	}
+	r.Use(cors.New(config))
 
 	// Открытые маршруты
 	r.GET("/users/:name/exists", rest.userExists) //проверка существования пользователя
