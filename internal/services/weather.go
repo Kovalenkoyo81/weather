@@ -10,7 +10,7 @@ import (
 )
 
 // GetCurrentWeather делает запрос к API погоды и возвращает погодные условия для указанного города
-func (s *Service) GetCurrentWeather(city, lang string) (*models.SimplifiedWeatherResponse, error) {
+func (s *Service) GetCurrentWeather(city, lang string) (any, error) {
 	client := resty.New()
 	resp, err := client.R().
 		SetQueryParams(map[string]string{
@@ -31,14 +31,16 @@ func (s *Service) GetCurrentWeather(city, lang string) (*models.SimplifiedWeathe
 	}
 
 	// Преобразуем полный ответ в сокращенный формат
-	simplifiedResponse := SimplifyWeatherResponse(&weatherResponse)
+	Response := SimplifyWeatherResponse(&weatherResponse)
 
-	return simplifiedResponse, nil
+	//return weatherResponse, nil
+	return Response, nil
 }
 
 // SimplifyWeatherResponse преобразует полный ответ о погоде в сокращенный формат.
 func SimplifyWeatherResponse(fullResponse *models.СurrentWeatherResponse) *models.SimplifiedWeatherResponse {
 	return &models.SimplifiedWeatherResponse{
+		Name:        fullResponse.Location.Name,
 		Temperature: fullResponse.Current.TempC,
 		Description: fullResponse.Current.Condition.Text,
 		WindSpeed:   fullResponse.Current.WindKph,

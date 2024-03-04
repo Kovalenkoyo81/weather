@@ -22,9 +22,9 @@ func NewServer(service *services.Service) *gin.Engine {
 
 	r := gin.Default()
 	rest := &Rest{service: service}
-	// Настройка CORS
+	//Настройка CORS
 	//r.Use(cors.Default())
-	// Настраиваем CORS для разрешения предварительных запросов и запросов со специальными заголовками
+	//Настраиваем CORS для разрешения предварительных запросов и запросов со специальными заголовками
 	config := cors.Config{
 		AllowOrigins:     []string{"*"}, // Разрешить все домены или указать конкретные
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},

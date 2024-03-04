@@ -184,6 +184,7 @@ components:
       properties:
         name:
           type: string
+          example: "userName"
           description: User's name
     LoginRequest:
       type: object
