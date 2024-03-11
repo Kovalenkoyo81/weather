@@ -24,6 +24,13 @@ func NewRepository() *Repository {
 	}
 }
 
+// Close является заглушкой для закрытия ресурсов  из за того что в leveldb мы используем аналогичный
+func (r *Repository) Close() error {
+	// В случае памяти нет ресурсов, которые нужно освободить,
+	// поэтому этот метод всегда возвращает nil в качестве ошибки.
+	return nil
+}
+
 func (r *Repository) AddUser(user models.User) {
 	r.mu.Lock()
 	defer r.mu.Unlock()

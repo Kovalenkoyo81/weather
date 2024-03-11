@@ -5,9 +5,13 @@ go 1.21.6
 require (
 	github.com/gin-contrib/cors v1.5.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/syndtr/goleveldb v1.0.0
 )
 
-require github.com/kr/text v0.2.0 // indirect
+require (
+	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
+	github.com/kr/text v0.2.0 // indirect
+)
 
 require (
 	github.com/bytedance/sonic v1.10.2 // indirect
