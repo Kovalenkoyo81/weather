@@ -20,9 +20,13 @@
 https://github.com/dbzyuzin/swagger/blob/dev/README.md
 7.1 сваггер 
 сделал
-7.2 alerts 
 7.3 leveldb
+сделал
 5 логирование 1
+
+7.2 alerts 
+
+
 
 
 

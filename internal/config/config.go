@@ -8,7 +8,8 @@ import (
 )
 
 var DebugMode bool = false
-var RepoIsLevelDB bool = true
+var RepoIsLevelDB bool = false
+
 var DbPath = "../leveldb"
 
 const Lang string = "ru"

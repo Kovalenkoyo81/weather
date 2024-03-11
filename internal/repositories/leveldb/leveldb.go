@@ -3,7 +3,6 @@ package leveldb
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/Kovalenkoyo81/weather/internal/models"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -60,7 +59,7 @@ func (r *Repository) FindUser(name string) bool {
 	}
 
 	// Пользователь найден
-	fmt.Println("leveldb")
+
 	return true
 }
 
