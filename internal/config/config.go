@@ -9,7 +9,7 @@ import (
 
 var DebugMode bool = false
 var RepoIsLevelDB bool = true
-var DbPath = "./level.db"
+var DbPath = "../level.db"
 
 const Lang string = "ru"
 const DefaultCity = "rostov"

@@ -18,49 +18,44 @@ import (
 )
 
 func main() {
-	repo := memory.NewRepository()
+	var repo services.UsersRepository
 	if config.RepoIsLevelDB {
-		repo, err := leveldb.NewRepository(config.DbPath)
+		dbRepo, err := leveldb.NewRepository(config.DbPath)
 		if err != nil {
 			log.Fatalf("Не удалось инициализировать репозиторий LevelDB: %v", err)
 		}
+		repo = dbRepo
 		defer repo.Close()
 
+	} else {
+		repo = memory.NewRepository()
 	}
 
 	service := services.New(repo)
-	router := rest.NewServer(service) // Получаем *gin.Engine
+	router := rest.NewServer(service)
 
 	server := &http.Server{
 		Addr:    ":8080",
-		Handler: router, // Используем *gin.Engine как обработчик
+		Handler: router,
 	}
 
 	go func() {
-		// ListenAndServe всегда возвращает ошибку. ErrServerClosed возвращается при Graceful Shutdown
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
 	println("Server started")
 
-	// Настройка Graceful Shutdown
 	quit := make(chan os.Signal, 1)
-	// Перехватываем SIGINT и SIGTERM (Ctrl+C и команды завершения)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit // Ожидаем сигнала
+	<-quit
 	log.Println("Shutting down server...")
 
-	// Плавное завершение работы сервера с таймаутом
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {
 		log.Fatal("Server forced to shutdown: ", err)
 	}
-	// Закрываем репозиторий
-	err := repo.Close()
-	if err != nil {
-		// Обработка ошибки
-	}
+
 	log.Println("Server exiting")
 }

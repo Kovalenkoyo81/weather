@@ -8,6 +8,7 @@ import (
 )
 
 type UsersRepository interface {
+	Close() error
 	AddUser(user models.User)
 	FindUser(name string) bool
 	SaveFavorite(userToken string, favorite models.Favorite) error

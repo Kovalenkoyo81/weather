@@ -31,10 +31,11 @@ func (r *Repository) Close() error {
 	return nil
 }
 
-func (r *Repository) AddUser(user models.User) {
+func (r *Repository) AddUser(user models.User) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.users = append(r.users, user)
+	return nil /// для унификации с leveldb
 
 }
 
