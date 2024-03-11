@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/Kovalenkoyo81/weather/internal/config"
@@ -73,7 +72,6 @@ func (r *Rest) login(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(loginRequest.User)
 	// Проверка существования пользователя
 	exists, err := r.service.UserExists(loginRequest.User)
 	if err != nil {
