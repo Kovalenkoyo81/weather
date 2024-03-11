@@ -79,11 +79,11 @@ func (r *Repository) DeleteFavorite(userToken, city string) error {
 }
 
 // Метод для сохранения токена пользователя
-func (r *Repository) SaveToken(token string, username string) {
+func (r *Repository) SaveToken(token string, username string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.tokensMap[token] = username
-
+	return nil
 }
 
 // Метод для получения имени пользователя по токену

@@ -9,12 +9,12 @@ import (
 
 type UsersRepository interface {
 	Close() error
-	AddUser(user models.User)
+	AddUser(user models.User) error
 	FindUser(name string) bool
 	SaveFavorite(userToken string, favorite models.Favorite) error
 	GetFavorites(userToken string) ([]models.Favorite, error)
 	DeleteFavorite(userToken, city string) error
-	SaveToken(token string, username string)
+	SaveToken(token string, username string) error
 	GetUserByToken(token string) (string, bool)
 }
 
