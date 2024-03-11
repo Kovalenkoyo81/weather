@@ -19,7 +19,7 @@ import (
 
 func main() {
 	repo := memory.NewRepository()
-	if config.RepoIsLevelDB == true {
+	if config.RepoIsLevelDB {
 		repo, err := leveldb.NewRepository(config.DbPath)
 		if err != nil {
 			log.Fatalf("Не удалось инициализировать репозиторий LevelDB: %v", err)
