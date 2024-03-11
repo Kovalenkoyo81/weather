@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"/weather/internal/models"
-
+	"github.com/Kovalenkoyo81/weather/internal/models"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
